@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/nguyen/!svn/ver/97/PageRank/src/it/poliba/sisinflab/PageRank
+END
+Runner.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/nguyen/!svn/ver/119/PageRank/src/it/poliba/sisinflab/PageRank/Runner.java
+END
+DataReader.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/nguyen/!svn/ver/119/PageRank/src/it/poliba/sisinflab/PageRank/DataReader.java
+END
+PersonalizedPageRank.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/nguyen/!svn/ver/119/PageRank/src/it/poliba/sisinflab/PageRank/PersonalizedPageRank.java
+END
+SparseVector.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/nguyen/!svn/ver/119/PageRank/src/it/poliba/sisinflab/PageRank/SparseVector.java
+END
+ST.java
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/nguyen/!svn/ver/97/PageRank/src/it/poliba/sisinflab/PageRank/ST.java
+END
+SparseMatrix.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/nguyen/!svn/ver/119/PageRank/src/it/poliba/sisinflab/PageRank/SparseMatrix.java
+END

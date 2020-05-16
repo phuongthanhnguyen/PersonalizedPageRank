@@ -1,0 +1,287 @@
+package it.poliba.sisinflab.PageRank;
+
+
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+
+
+class ValueComparator implements Comparator<String> {
+
+    Map<String, Double> base;
+    public ValueComparator(Map<String, Double> base) {
+        this.base = base;
+    }
+
+    // Note: this comparator imposes orderings that are inconsistent with equals.    
+    public int compare(String a, String b) {
+        if (base.get(a) >= base.get(b)) {
+            return -1;
+        } else {
+            return 1;
+        } // returning 0 would merge keys
+    }
+}
+
+
+
+public class Runner {
+	
+	private String root;
+	private String graphDir;
+	private String groundTruth;
+	private int index;
+
+	public Runner(){
+		
+	}
+	
+	public void loadConfigurations(){		
+		Properties prop = new Properties();				
+		try {
+			prop.load(new FileInputStream("evaluation.properties"));
+			this.root=prop.getProperty("PageRankRoot");		
+			this.graphDir=prop.getProperty("GraphDirectory");
+			this.groundTruth=prop.getProperty("GroundTruth");
+			this.index=Integer.parseInt(prop.getProperty("index")); 
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+		return;
+	}
+	
+	
+	
+	public void run(){		
+		System.out.println("Personalized PageRank!");
+		loadConfigurations();		
+		pageRankSimilarity3();
+	}
+	
+		
+	
+	
+	public void pageRankSimilarity(){
+		
+		DataReader reader = new DataReader(this.root);	
+		Map<String, List<String>> list = new HashMap<String, List<String>>();		
+		Map<String, Integer> dictionary = new HashMap<String, Integer>();		
+		String graphFilename = "", dictFilename = "";		
+		String str="",content="";
+		String filename = "ListOfPairs"+Integer.toString(index);
+		BufferedWriter writer = null, writer2=null;
+		
+		List<String> nodes = new ArrayList<String>();
+		
+		int id1=0,id2=0;
+		double val=0;
+				
+		list = reader.readArtistList(this.graphDir+filename);				
+		PersonalizedPageRank ppr = null;		
+		SparseVector pageRankVector1=null,pageRankVector2=null;						
+		Set<String> keySet = list.keySet();
+		
+		
+				
+		try {
+		
+			writer = new BufferedWriter(new FileWriter(this.root+"newArtistListForPageRank"+Integer.toString(index)));			
+						
+			for(String resource1:keySet) {			
+				nodes = list.get(resource1);
+			
+				writer2 = new BufferedWriter(new FileWriter(this.root+resource1));
+				
+				for(String resource2:nodes ){				
+					str = resource1+"+"+resource2;				
+					graphFilename = this.graphDir+"Graph" + Integer.toString(index) + "/" + str;							
+					dictFilename = this.graphDir+"Dictionary" + Integer.toString(index) + "/" + str;				
+					dictionary = reader.readDictionary(dictFilename);								
+					id1 = dictionary.get("http://dbpedia.org/resource/"+resource1);
+					id2 = dictionary.get("http://dbpedia.org/resource/"+resource2);				
+					ppr = new PersonalizedPageRank(graphFilename);				
+					pageRankVector1 = ppr.calculatePersonalizedPageRankVector(id1);
+					pageRankVector2 = ppr.calculatePersonalizedPageRankVector(id2);
+					val=pageRankVector1.cosineSimilarity(pageRankVector2);
+					System.out.println("The similarity between " + resource1 + " and " + resource2 + " is: " + val);
+					content = resource2 + "\t" + Double.toString(val);
+					writer2.append(content);							
+					writer2.newLine();
+					writer2.flush();
+					
+				}
+				writer2.close();
+				
+				writer.append(resource1);							
+				writer.newLine();
+				writer.flush();			
+			}			
+			writer.close();
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}				
+		return;
+	}
+	
+	
+	
+	
+	public void pageRankSimilarity2(){
+		DataReader reader = new DataReader(this.root);	
+		Map<String, Integer> dictionary = new HashMap<String, Integer>();		
+		String graphFilename = "", dictFilename = "";		
+		String content="";
+		//String filename = "ListOfPairs"+Integer.toString(index);
+		BufferedWriter writer = null, writer2=null;
+		
+		List<String> artistList = new ArrayList<String>();
+		
+		int id1=0,id2=0;
+		double val=0;
+				
+		String resource1="",resource2="";
+						
+		artistList = reader.readArtistList2(this.graphDir+"ArtistList10");
+		int n = artistList.size();
+		
+		graphFilename = this.graphDir+"Graph"+ Integer.toString(index) +"/Graph";
+		dictFilename = this.graphDir+"Dictionary" +Integer.toString(index) +"/Dictionary";
+					
+		PersonalizedPageRank ppr = null;
+		SparseVector pageRankVector1=null,pageRankVector2=null;		
+		
+		dictionary = reader.readDictionary(dictFilename);
+		
+		
+		int size = dictionary.size();	
+		
+		System.out.println("Here");
+		ppr = new PersonalizedPageRank(graphFilename, size);
+		
+				
+		System.out.println("Start calculating");
+		
+		
+		for(int i=0;i<n-1;i++){				
+			resource1 = artistList.get(i);	
+			try {
+				writer2 = new BufferedWriter(new FileWriter(this.root+resource1));
+				
+				for(int j=i+1;j<n;j++){					
+					resource2 = artistList.get(j);					
+					pageRankVector1=null;
+					pageRankVector2=null;
+					id1 = dictionary.get("http://dbpedia.org/resource/"+resource1);
+					id2 = dictionary.get("http://dbpedia.org/resource/"+resource2);									
+					pageRankVector1 = ppr.calculatePersonalizedPageRankVector(id1);
+					pageRankVector2 = ppr.calculatePersonalizedPageRankVector(id2);
+					val=pageRankVector1.cosineSimilarity(pageRankVector2);
+					System.out.println("The similarity between " + resource1 + " and " + resource2 + " is: " + val);
+					content = resource2 + "\t" + Double.toString(val);
+					writer2.append(content);							
+					writer2.newLine();
+					writer2.flush();				
+				}					
+				
+				writer2.close();
+			
+			} catch (IOException e) {
+					e.printStackTrace();
+			}	
+		}
+			
+		return;
+	}
+	
+	
+	
+	
+	
+	
+	
+	public void pageRankSimilarity3(){
+		DataReader reader = new DataReader(this.root);	
+		Map<String, Integer> dictionary = new HashMap<String, Integer>();		
+		String graphFilename = "", dictFilename = "";		
+		String content="";
+		BufferedWriter writer2=null;		
+		List<String> artistList = new ArrayList<String>();
+		
+		int id1=0,id2=0;
+		double val=0;
+				
+		String resource1="",resource2="",filename="";
+						
+		artistList = reader.readArtistList2(this.groundTruth+"newMusicalArtistList1200_1");
+		int n = artistList.size();
+		int size = 0, m = 0 ;
+		
+		ArrayList<String> list = null;		
+		PersonalizedPageRank ppr = null;
+		SparseVector pageRankVector1=null,pageRankVector2=null;
+		String key1="",key2="";
+		
+		for(int i=0;i<n;i++){		
+			resource1 = artistList.get(i);
+			list = new ArrayList<String>();
+			filename = this.groundTruth + resource1;			
+			list.addAll(reader.readSimilarityArtist(filename));
+			m = list.size();
+			graphFilename = this.graphDir+"Graph"+ Integer.toString(index) +"/"+resource1;
+			dictFilename = this.graphDir+"Dictionary" + Integer.toString(index) +"/"+resource1;
+			dictionary = reader.readDictionary(dictFilename);
+			size = dictionary.size();			
+			ppr = new PersonalizedPageRank(graphFilename, size);
+			System.out.println("Start calculating");
+			key1 = "http://dbpedia.org/resource/"+resource1;
+			id1 = dictionary.get(key1);
+			pageRankVector1 = ppr.calculatePersonalizedPageRankVector(id1);
+			
+			try {
+				writer2 = new BufferedWriter(new FileWriter(this.root+resource1));				
+				for(int j=0;j<m;j++){
+					resource2 = list.get(j);				
+					pageRankVector2=null;					
+					key2 = "http://dbpedia.org/resource/"+resource2;					
+					if(dictionary.containsKey(key2)){						
+						id2 = dictionary.get(key2);					
+						pageRankVector2 = ppr.calculatePersonalizedPageRankVector(id2);
+						val = pageRankVector1.cosineSimilarity(pageRankVector2);
+						System.out.println("The similarity between " + resource1 + " and " + resource2 + " is: " + val);
+						content = resource2 + "\t" + Double.toString(val);
+						writer2.append(content);							
+						writer2.newLine();
+						writer2.flush();						
+					}								
+				}			
+				writer2.close();				
+			} catch (IOException e) {
+					e.printStackTrace();
+			}		
+		}
+		
+		System.out.println("Finish calculating!");				
+		return;
+	}
+	
+	
+	public static void main(String[] args) {	
+		Runner runner = new Runner();			
+		runner.run();				    		    
+		return;
+	}	
+	
+}
