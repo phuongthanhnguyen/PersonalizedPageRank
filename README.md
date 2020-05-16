@@ -1,11 +1,6 @@
 # PersonalizedPageRank
-A Java implementation of the Personalized PageRank algorithm
 
-
-
-# SimRank
-
-This repository contains the source code implementation of Personalized PageRank and a dataset for testing the algorithm.
+This repository contains a Java implementation of the Personalized PageRank algorithm and a dataset for testing.
 
 
 ## Introduction
